@@ -15,15 +15,13 @@ import { cn } from "@/lib/utils";
 import { CgSpinnerTwo } from "react-icons/cg";
 
 function ListInvoices() {
-  const [checkedAllInvoices, setCheckedAllInvoices] = useState(false);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [invoiceIds, setInvoiceIds] = useState<number[]>([]);
   const hasMorePage = page < totalPages;
   const hasPreviousPage = page > 1;
-
-  console.log(page, hasPreviousPage);
 
   const getInvoicesAsync = async () => {
     try {
@@ -39,7 +37,23 @@ function ListInvoices() {
     }
   };
 
+  const setAllChecked = () => {
+    setInvoiceIds((prev) => {
+      const allIds = invoices.map((invoice) => invoice.id);
+      const allChecked = allIds.every((id) => prev.includes(id));
+
+      if (allChecked) {
+        return [];
+      } else {
+        const newIds = new Set(prev);
+        allIds.forEach((id) => newIds.add(id));
+        return Array.from(newIds);
+      }
+    });
+  };
+
   useEffect(() => {
+    setInvoiceIds([]);
     getInvoicesAsync();
   }, [page]);
 
@@ -58,13 +72,8 @@ function ListInvoices() {
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="recent users"
-                  className={`${
-                    checkedAllInvoices ? "border-green-600" : "border-gray-700"
-                  }`}
-                  checked={checkedAllInvoices}
-                  onCheckedChange={(checked) =>
-                    setCheckedAllInvoices(checked.valueOf() as boolean)
-                  }
+                  checked={invoiceIds.length === invoices.length}
+                  onCheckedChange={() => setAllChecked()}
                 />
               </div>
             </div>
@@ -95,7 +104,12 @@ function ListInvoices() {
               </div>
             )}
             {invoices.map((invoice) => (
-              <InvoiceCard key={invoice.id} invoice={invoice} />
+              <InvoiceCard
+                key={invoice.id}
+                invoice={invoice}
+                invoiceIds={invoiceIds}
+                setInvoiceIds={setInvoiceIds}
+              />
             ))}
           </div>
 

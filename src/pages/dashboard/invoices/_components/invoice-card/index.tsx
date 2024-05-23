@@ -12,10 +12,17 @@ import { GoDesktopDownload } from "react-icons/go";
 import { FiTrash2 } from "react-icons/fi";
 interface InvoiceCardProps {
   invoice?: Invoice;
+  invoiceIds: number[];
+  setInvoiceIds: React.Dispatch<React.SetStateAction<number[]>>;
 }
 
-const InvoiceCard = ({ invoice }: InvoiceCardProps) => {
-  const [checkedUser, setCheckedUser] = useState(false);
+const InvoiceCard = ({
+  invoice,
+  invoiceIds,
+  setInvoiceIds,
+}: InvoiceCardProps) => {
+  const [open, setOpen] = useState(false);
+
   const mediumEnergyValue = () => {
     let medium = 0;
     if (invoice?.sceeEnergy && invoice?.electricEnergy) {
@@ -26,7 +33,6 @@ const InvoiceCard = ({ invoice }: InvoiceCardProps) => {
     } else if (invoice?.electricEnergy) {
       medium = invoice?.electricEnergy.quantity;
     }
-
     return medium;
   };
 
@@ -36,13 +42,14 @@ const InvoiceCard = ({ invoice }: InvoiceCardProps) => {
         <div className="flex items-center space-x-3">
           <Checkbox
             id="recent users"
-            className={`${
-              checkedUser ? "border-green-600" : "border-gray-700"
-            }`}
-            checked={checkedUser}
-            onCheckedChange={(checked) =>
-              setCheckedUser(checked.valueOf() as boolean)
-            }
+            checked={invoiceIds.includes(invoice?.id as number)}
+            onCheckedChange={() => {
+              if (invoiceIds.includes(invoice?.id as number)) {
+                setInvoiceIds(invoiceIds.filter((id) => id !== invoice?.id));
+              } else {
+                setInvoiceIds([...invoiceIds, invoice?.id as number]);
+              }
+            }}
           />
         </div>
       </div>
@@ -70,7 +77,7 @@ const InvoiceCard = ({ invoice }: InvoiceCardProps) => {
           <GoDesktopDownload className="text-gray-900" size={25} />
         </Button>
 
-        <AlertDialog>
+        <AlertDialog open={open} onOpenChange={setOpen}>
           <AlertDialogTrigger asChild>
             <Button
               className="bg-transparent hover:bg-transparent"
@@ -80,7 +87,10 @@ const InvoiceCard = ({ invoice }: InvoiceCardProps) => {
               <FiTrash2 className="text-red-600" size={25} />
             </Button>
           </AlertDialogTrigger>
-          <DeleteInvoicePopup />
+          <DeleteInvoicePopup
+            itemsQuantity={invoiceIds.length}
+            setOpen={setOpen}
+          />
         </AlertDialog>
       </div>
     </div>
