@@ -23,8 +23,9 @@ import { Button } from "@/components/ui/button";
 import { ImSearch } from "react-icons/im";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
-import { Consumption } from "@/models/consumption.model";
+import { ConsumptionValue } from "@/models/consumption-value.model";
 import * as XLSX from "xlsx";
+import { formatCurrency } from "@/utils/FormatCurrencyValue";
 
 interface CustomTooltipData {
   name: string;
@@ -37,11 +38,11 @@ interface CustomTooltipProps {
   payload?: CustomTooltipData[];
 }
 
-export interface FormateConsumption {
+export interface FormateConsumptionValue {
   name: string;
-  averageEnergyConsumptionKWh: number;
   numberOfInvoices: number;
-  totalCompensatedEnergyKWh: number;
+  averageValueWithoutGD: number;
+  gdEconomy: number;
 }
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
@@ -49,13 +50,11 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
     return null;
   }
 
-  // const formattedValue = payload[0].value > 1000 ? formatNumber(payload[0].value) : payload[0].value;
-
   const formattedValue = (value: number) => {
     if (value > 1000) {
-      return formatNumber(value);
+      return formatCurrency(value);
     } else {
-      return value;
+      return formatCurrency(value);
     }
   };
 
@@ -71,20 +70,16 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
   );
 };
 
-const formatNumber = (value: number) => {
-  return value.toLocaleString("en-US", { minimumFractionDigits: 0 });
-};
-
-const TotalEnergyConsumptionChart = () => {
+const TotalEnergyValueChart = () => {
   const width = useWindowWidth();
   const [searchValue, setSearchValue] = useState("");
   const [years, setYears] = useState<number[]>([]);
   const [year, setYear] = useState(
     JSON.stringify(new Date().getFullYear() - 1),
   );
-  const [consumptionData, setConsumptionData] = useState<FormateConsumption[]>(
-    [],
-  );
+  const [consumptionValueData, setConsumptionValueData] = useState<
+    FormateConsumptionValue[]
+  >([]);
 
   const debounce = <T extends (...args: string[]) => void>(
     cb: T,
@@ -109,17 +104,17 @@ const TotalEnergyConsumptionChart = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onInputWithDebouncing = useCallback(debounce(onInput, 1000), []);
 
-  function mapData(data: Consumption[]): FormateConsumption[] {
+  function mapData(data: ConsumptionValue[]): FormateConsumptionValue[] {
     return data.map((item) => ({
       name: item.referenceMonth.split("/")[0],
-      averageEnergyConsumptionKWh: item.averageEnergyConsumptionKWh,
       numberOfInvoices: item.numberOfInvoices,
-      totalCompensatedEnergyKWh: item.totalCompensatedEnergyKWh,
+      averageValueWithoutGD: item.averageValueWithoutGD,
+      gdEconomy: item.gdEconomy,
     }));
   }
 
   const handleClickDownload = () => {
-    const worksheet = XLSX.utils.json_to_sheet(consumptionData);
+    const worksheet = XLSX.utils.json_to_sheet(consumptionValueData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
     XLSX.writeFile(workbook, `consumo-energia.xlsx`);
@@ -135,11 +130,9 @@ const TotalEnergyConsumptionChart = () => {
   const getTotalEnergyConsumption = useCallback(() => {
     console.log(year, searchValue);
     api
-      .get(
-        `/energy-consumption-metrics?year=${year}&clientNumber=${searchValue}`,
-      )
+      .get(`/energy-financial-metrics?year=${year}&clientNumber=${searchValue}`)
       .then((response) => {
-        setConsumptionData(mapData(response.data));
+        setConsumptionValueData(mapData(response.data));
       });
   }, [year, searchValue]);
 
@@ -153,7 +146,7 @@ const TotalEnergyConsumptionChart = () => {
       <CardHeader className="mb-3 px-0 tablet:px-6 laptop:mb-0">
         <div className="flex flex-col items-start gap-5 laptop:flex-row laptop:items-center laptop:gap-10">
           <CardTitle className="font-inter text-2xl font-semibold text-zinc-900">
-            Total de energia consumida (kWh)
+            Total de energia - valor (R$)
           </CardTitle>
 
           <div className="mt-0 hidden h-5 w-[2px] bg-gray-400 laptop:block" />
@@ -162,13 +155,13 @@ const TotalEnergyConsumptionChart = () => {
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-zinc-900" />
               <h2 className="font-inter text-lg font-[400] text-zinc-900">
-                Consumo de energia
+                Valor Total sem GD
               </h2>
             </div>
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-red-400" />
               <h2 className="font-inter text-lg font-[400] text-zinc-900">
-                Energia compensada
+                Economia GD
               </h2>
             </div>
           </div>
@@ -221,7 +214,7 @@ const TotalEnergyConsumptionChart = () => {
             <LineChart
               width={500}
               height={300}
-              data={consumptionData}
+              data={consumptionValueData}
               margin={{
                 top: 5,
                 right: 30,
@@ -258,13 +251,13 @@ const TotalEnergyConsumptionChart = () => {
               <Tooltip content={<CustomTooltip />} />
               <Line
                 type="monotone"
-                dataKey="averageEnergyConsumptionKWh"
+                dataKey="averageValueWithoutGD"
                 stroke="#1C1C1C"
                 dot={false}
               />
               <Line
                 type="monotone"
-                dataKey="totalCompensatedEnergyKWh"
+                dataKey="gdEconomy"
                 dot={false}
                 stroke="#f67e7e"
                 strokeDasharray="5 5"
@@ -278,4 +271,4 @@ const TotalEnergyConsumptionChart = () => {
   );
 };
 
-export default TotalEnergyConsumptionChart;
+export default TotalEnergyValueChart;
