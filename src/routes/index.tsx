@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { CgSpinnerTwo } from "react-icons/cg";
 
 import { Dashboard } from "@/layout";
 
@@ -18,7 +19,13 @@ const InvoicesRouter = lazy(() =>
 
 export function Router(): ReactElement {
   return (
-    <Suspense fallback={<div>loading</div>}>
+    <Suspense
+      fallback={
+        <div className="flex h-[100vh] w-full items-center justify-center bg-gray-300/75">
+          <CgSpinnerTwo className="animate-spin text-6xl" />
+        </div>
+      }
+    >
       <Routes>
         <Route element={<Dashboard />}>
           <Route index element={<Navigate to="/home" />} />
