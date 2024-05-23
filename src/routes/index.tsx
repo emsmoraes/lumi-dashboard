@@ -10,6 +10,12 @@ const HomeRouter = lazy(() =>
   })),
 );
 
+const InvoicesRouter = lazy(() =>
+  import("@/pages/dashboard/invoices/router").then((module) => ({
+    default: module.Router,
+  })),
+);
+
 export function Router(): ReactElement {
   return (
     <Suspense fallback={<div>loading</div>}>
@@ -17,6 +23,7 @@ export function Router(): ReactElement {
         <Route element={<Dashboard />}>
           <Route index element={<Navigate to="/home" />} />
           <Route path="home/*" element={<HomeRouter />} />
+          <Route path="invoices/*" element={<InvoicesRouter />} />
         </Route>
       </Routes>
     </Suspense>
