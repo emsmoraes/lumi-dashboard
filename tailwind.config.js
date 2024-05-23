@@ -71,6 +71,16 @@ module.exports = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      fontFamily: {
+        manrope: ["Manrope"],
+        inter: ["Inter"],
+      },
+      screens: {
+        mobile: "320px",
+        tablet: "640px",
+        laptop: "1024px",
+        desktop: "1280px",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
