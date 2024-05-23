@@ -13,6 +13,9 @@ import {
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 import { CgSpinnerTwo } from "react-icons/cg";
+import { Button } from "@/components/ui/button";
+import { MdDownload } from "react-icons/md";
+import { useInvoicePdf } from "@/hooks/useInvoicesPdf";
 
 function ListInvoices() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -57,6 +60,10 @@ function ListInvoices() {
     getInvoicesAsync();
   }, [page]);
 
+  const downloadPdf = useInvoicePdf(
+    invoices.filter((invoice) => invoiceIds.includes(invoice.id)),
+  );
+
   return (
     <ContentCard>
       <CardHeader className="px-0 tablet:px-6">
@@ -98,6 +105,15 @@ function ListInvoices() {
           </div>
 
           <div className="flex w-full flex-col gap-4">
+            {invoiceIds.length > 0 && (
+              <Button
+                onClick={downloadPdf}
+                className="w-fit border-2 border-solid border-primary bg-transparent font-semibold text-primary hover:bg-transparent"
+              >
+                <MdDownload fontSize={20} className="mr-2" /> Baixar{" "}
+                {invoiceIds.length}{" "}
+              </Button>
+            )}
             {isLoading && (
               <div className="mt-3 flex w-full items-center justify-center">
                 <CgSpinnerTwo className="h-16 w-16 animate-spin" />

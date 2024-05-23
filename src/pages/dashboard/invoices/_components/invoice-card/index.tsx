@@ -1,15 +1,10 @@
-import { memo, useState } from "react";
+import { memo } from "react";
 import { Checkbox } from "../../../../../components/ui/checkbox";
 import { Button } from "../../../../../components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-} from "../../../../../components/ui/alert-dialog";
-import DeleteInvoicePopup from "../delete-invoice-popup";
 import { Invoice } from "@/models/invoice.model";
 import moment from "moment";
 import { GoDesktopDownload } from "react-icons/go";
-import { FiTrash2 } from "react-icons/fi";
+import { useInvoicePdf } from "@/hooks/useInvoicesPdf";
 interface InvoiceCardProps {
   invoice?: Invoice;
   invoiceIds: number[];
@@ -21,8 +16,6 @@ const InvoiceCard = ({
   invoiceIds,
   setInvoiceIds,
 }: InvoiceCardProps) => {
-  const [open, setOpen] = useState(false);
-
   const mediumEnergyValue = () => {
     let medium = 0;
     if (invoice?.sceeEnergy && invoice?.electricEnergy) {
@@ -35,6 +28,8 @@ const InvoiceCard = ({
     }
     return medium;
   };
+
+  const downloadPdf = useInvoicePdf([invoice!]);
 
   return (
     <div className="grid w-full grid-cols-7 grid-rows-1 items-center gap-4 rounded-md border border-solid border-gray-200 px-4 py-3">
@@ -73,25 +68,10 @@ const InvoiceCard = ({
           className="bg-transparent hover:bg-transparent"
           variant="secondary"
           size="icon"
+          onClick={downloadPdf}
         >
           <GoDesktopDownload className="text-gray-900" size={25} />
         </Button>
-
-        <AlertDialog open={open} onOpenChange={setOpen}>
-          <AlertDialogTrigger asChild>
-            <Button
-              className="bg-transparent hover:bg-transparent"
-              variant="secondary"
-              size="icon"
-            >
-              <FiTrash2 className="text-red-600" size={25} />
-            </Button>
-          </AlertDialogTrigger>
-          <DeleteInvoicePopup
-            itemsQuantity={invoiceIds.length}
-            setOpen={setOpen}
-          />
-        </AlertDialog>
       </div>
     </div>
   );

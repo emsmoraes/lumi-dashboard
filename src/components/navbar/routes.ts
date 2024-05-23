@@ -11,6 +11,6 @@ export const Routes: Route[] = [
   {
     icon: HiMiniCurrencyDollar,
     pathname: "invoices",
-    label: "Contas",
+    label: "Faturas",
   },
 ];
