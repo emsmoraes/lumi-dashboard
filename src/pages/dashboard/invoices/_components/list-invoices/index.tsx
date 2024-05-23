@@ -78,10 +78,10 @@ function ListInvoices() {
               Inserida em
             </h2>
             <h2 className="overflow-hidden text-ellipsis text-nowrap font-inter text-[15px] font-semibold">
-              ID
+              Identificador
             </h2>
             <h2 className="overflow-hidden text-ellipsis text-nowrap font-inter text-[15px] font-semibold">
-              Tipo de conta
+              Consumo médio
             </h2>
             <h2 className="overflow-hidden text-ellipsis text-nowrap font-inter text-[15px] font-semibold">
               Ação
