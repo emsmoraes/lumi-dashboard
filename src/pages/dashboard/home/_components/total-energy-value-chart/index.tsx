@@ -117,7 +117,7 @@ const TotalEnergyValueChart = () => {
     const worksheet = XLSX.utils.json_to_sheet(consumptionValueData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, `consumo-energia.xlsx`);
+    XLSX.writeFile(workbook, `valor-consumo.xlsx`);
   };
 
   const getYears = () => {
