@@ -26,6 +26,7 @@ import { api } from "@/lib/api";
 import { ConsumptionValue } from "@/models/consumption-value.model";
 import * as XLSX from "xlsx";
 import { formatCurrency } from "@/utils/FormatCurrencyValue";
+import SkeletonPageCard from "@/components/skeleton-page-card";
 
 interface CustomTooltipData {
   name: string;
@@ -74,6 +75,7 @@ const TotalEnergyValueChart = () => {
   const width = useWindowWidth();
   const [searchValue, setSearchValue] = useState("");
   const [years, setYears] = useState<number[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [year, setYear] = useState(
     JSON.stringify(new Date().getFullYear() - 1),
   );
@@ -128,11 +130,16 @@ const TotalEnergyValueChart = () => {
   };
 
   const getTotalEnergyConsumption = useCallback(() => {
-    console.log(year, searchValue);
+    setIsSearching(true);
     api
       .get(`/energy-financial-metrics?year=${year}&clientNumber=${searchValue}`)
       .then((response) => {
         setConsumptionValueData(mapData(response.data));
+        setIsSearching(false);
+      })
+      .catch(() => {
+        setIsSearching(false);
+        alert("Erro ao buscar dados");
       });
   }, [year, searchValue]);
 
@@ -210,61 +217,65 @@ const TotalEnergyValueChart = () => {
 
       <CardContent className="overflow-x-auto px-0 pb-0 tablet:px-6 [&::-webkit-scrollbar]:hidden">
         <div className="w-[650px] tablet:w-full">
-          <ResponsiveContainer width={"100%"} height={350}>
-            <LineChart
-              width={500}
-              height={300}
-              data={consumptionValueData}
-              margin={{
-                top: 5,
-                right: 30,
-                left: 20,
-                bottom: 5,
-              }}
-            >
-              <YAxis
-                padding={{ bottom: 45 }}
-                axisLine={false}
-                tickLine={false}
-                tickCount={4}
-                tickFormatter={(value) =>
-                  value !== 0 && value >= 1000 ? `${value}K` : `${value}`
-                }
-                tick={{
-                  fontSize: width < 640 ? 15 : 18,
-                  fontWeight: "400",
-                  fontFamily: "Inter",
+          {!isSearching && (
+            <ResponsiveContainer width={"100%"} height={350}>
+              <LineChart
+                width={500}
+                height={300}
+                data={consumptionValueData}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
                 }}
-              />
-              <XAxis
-                padding={{ left: 35 }}
-                dataKey="name"
-                axisLine={false}
-                tickLine={false}
-                tick={{
-                  fontSize: width < 640 ? 15 : 18,
-                  fontWeight: "400",
-                  fontFamily: "Inter",
-                }}
-              />
-              {/* <Tooltip contentStyle={{ backgroundColor: "transparent", border: "none" }}/> */}
-              <Tooltip content={<CustomTooltip />} />
-              <Line
-                type="monotone"
-                dataKey="averageValueWithoutGD"
-                stroke="#1C1C1C"
-                dot={false}
-              />
-              <Line
-                type="monotone"
-                dataKey="gdEconomy"
-                dot={false}
-                stroke="#f67e7e"
-                strokeDasharray="5 5"
-                strokeWidth={2}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+              >
+                <YAxis
+                  padding={{ bottom: 45 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickCount={4}
+                  tickFormatter={(value) =>
+                    value !== 0 && value >= 1000 ? `${value}K` : `${value}`
+                  }
+                  tick={{
+                    fontSize: width < 640 ? 15 : 18,
+                    fontWeight: "400",
+                    fontFamily: "Inter",
+                  }}
+                />
+                <XAxis
+                  padding={{ left: 35 }}
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{
+                    fontSize: width < 640 ? 15 : 18,
+                    fontWeight: "400",
+                    fontFamily: "Inter",
+                  }}
+                />
+                {/* <Tooltip contentStyle={{ backgroundColor: "transparent", border: "none" }}/> */}
+                <Tooltip content={<CustomTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey="averageValueWithoutGD"
+                  stroke="#1C1C1C"
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="gdEconomy"
+                  dot={false}
+                  stroke="#f67e7e"
+                  strokeDasharray="5 5"
+                  strokeWidth={2}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+
+          {isSearching && <SkeletonPageCard />}
         </div>
       </CardContent>
     </ContentCard>
