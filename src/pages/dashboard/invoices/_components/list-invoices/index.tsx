@@ -80,8 +80,11 @@ function ListInvoices() {
             <div className="flex items-center">
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="recent users"
-                  checked={invoiceIds.length === invoices.length}
+                  id="invoices"
+                  checked={
+                    invoiceIds.length === invoices.length &&
+                    invoiceIds.length > 0
+                  }
                   onCheckedChange={() => setAllChecked()}
                 />
               </div>
