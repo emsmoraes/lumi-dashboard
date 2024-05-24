@@ -174,7 +174,7 @@ const TotalEnergyConsumptionChart = () => {
 
       <CardContent className="overflow-x-auto px-0 pb-0 tablet:px-6 [&::-webkit-scrollbar]:hidden">
         <div className="w-[650px] tablet:w-full">
-          {!isSearching && (
+          {!isSearching && consumptionData && (
             <ConsumptionChart consumptionData={consumptionData} />
           )}
 
