@@ -27,17 +27,19 @@ function ListInvoices() {
   const hasPreviousPage = page > 1;
 
   const getInvoicesAsync = async () => {
-    try {
-      setIsLoading(true);
-      api.get(`/invoices?page=${page}`).then((res) => {
+    setIsLoading(true);
+    api
+      .get(`/invoices?page=${page}`)
+      .then((res) => {
         setInvoices(res.data.invoices);
         setTotalPages(res.data.totalPages);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setIsLoading(false);
+        alert("Ocorreu um erro ao buscar as faturas");
       });
-      setIsLoading(false);
-    } catch (error) {
-      console.log(error);
-      setIsLoading(false);
-    }
   };
 
   const setAllChecked = () => {
