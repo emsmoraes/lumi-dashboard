@@ -1,16 +1,7 @@
 import ContentCard from "@/components/content-card";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useWindowWidth } from "@/hooks/useWindowWidth";
 import React, { useCallback, useEffect, useState } from "react";
 import { PiExportBold } from "react-icons/pi";
-import {
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import {
   Select,
   SelectContent,
@@ -25,19 +16,8 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { ConsumptionValue } from "@/models/consumption-value.model";
 import * as XLSX from "xlsx";
-import { formatCurrency } from "@/utils/FormatCurrencyValue";
 import SkeletonPageCard from "@/components/skeleton-page-card";
-
-interface CustomTooltipData {
-  name: string;
-  value: number;
-  unit: string;
-}
-
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: CustomTooltipData[];
-}
+import ValueChart from "../value-chart";
 
 export interface FormateConsumptionValue {
   name: string;
@@ -46,33 +26,7 @@ export interface FormateConsumptionValue {
   gdEconomy: number;
 }
 
-const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
-  if (!active || !payload) {
-    return null;
-  }
-
-  const formattedValue = (value: number) => {
-    if (value > 1000) {
-      return formatCurrency(value);
-    } else {
-      return formatCurrency(value);
-    }
-  };
-
-  return (
-    <div className="custom-tooltip">
-      <h2 className="font-inter text-4xl font-[400]">{`${formattedValue(
-        payload[0].value,
-      )}`}</h2>
-      <h2 className="font-inter text-4xl font-[400] text-[#f67e7e]">{`${formattedValue(
-        payload[1].value,
-      )}`}</h2>
-    </div>
-  );
-};
-
 const TotalEnergyValueChart = () => {
-  const width = useWindowWidth();
   const [searchValue, setSearchValue] = useState("");
   const [years, setYears] = useState<number[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -218,61 +172,7 @@ const TotalEnergyValueChart = () => {
       <CardContent className="overflow-x-auto px-0 pb-0 tablet:px-6 [&::-webkit-scrollbar]:hidden">
         <div className="w-[650px] tablet:w-full">
           {!isSearching && (
-            <ResponsiveContainer width={"100%"} height={350}>
-              <LineChart
-                width={500}
-                height={300}
-                data={consumptionValueData}
-                margin={{
-                  top: 5,
-                  right: 30,
-                  left: 20,
-                  bottom: 5,
-                }}
-              >
-                <YAxis
-                  padding={{ bottom: 45 }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickCount={4}
-                  tickFormatter={(value) =>
-                    value !== 0 && value >= 1000 ? `${value}K` : `${value}`
-                  }
-                  tick={{
-                    fontSize: width < 640 ? 15 : 18,
-                    fontWeight: "400",
-                    fontFamily: "Inter",
-                  }}
-                />
-                <XAxis
-                  padding={{ left: 35 }}
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{
-                    fontSize: width < 640 ? 15 : 18,
-                    fontWeight: "400",
-                    fontFamily: "Inter",
-                  }}
-                />
-                {/* <Tooltip contentStyle={{ backgroundColor: "transparent", border: "none" }}/> */}
-                <Tooltip content={<CustomTooltip />} />
-                <Line
-                  type="monotone"
-                  dataKey="averageValueWithoutGD"
-                  stroke="#1C1C1C"
-                  dot={false}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="gdEconomy"
-                  dot={false}
-                  stroke="#f67e7e"
-                  strokeDasharray="5 5"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <ValueChart consumptionValueData={consumptionValueData} />
           )}
 
           {isSearching && <SkeletonPageCard />}
