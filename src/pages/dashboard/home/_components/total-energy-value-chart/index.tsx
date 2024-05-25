@@ -1,6 +1,6 @@
 import ContentCard from "@/components/content-card";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { PiExportBold } from "react-icons/pi";
 import {
   Select,
