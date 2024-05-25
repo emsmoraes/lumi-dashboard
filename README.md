@@ -48,7 +48,7 @@ VITE_API_BASE_URL="http://localhost:3000" (precisa da api rodando localmente) ou
 para rodar o projeto, use: <npm run dev>
 ```
 
-## ⛓️ Projeto hospedado
+## ⛓️ Projeto hospedado (Contém Algum Delay)
 
 [Clique Aqui](https://lumi-dashboard.vercel.app)
 
