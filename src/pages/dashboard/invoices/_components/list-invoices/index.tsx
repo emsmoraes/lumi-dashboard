@@ -124,14 +124,15 @@ function ListInvoices() {
                 <CgSpinnerTwo className="h-16 w-16 animate-spin" />
               </div>
             )}
-            {invoices.map((invoice) => (
-              <InvoiceCard
-                key={invoice.id}
-                invoice={invoice}
-                invoiceIds={invoiceIds}
-                setInvoiceIds={setInvoiceIds}
-              />
-            ))}
+            {!isLoading &&
+              invoices.map((invoice) => (
+                <InvoiceCard
+                  key={invoice.id}
+                  invoice={invoice}
+                  invoiceIds={invoiceIds}
+                  setInvoiceIds={setInvoiceIds}
+                />
+              ))}
           </div>
 
           <div className="mt-8 flex w-full items-center justify-end">
