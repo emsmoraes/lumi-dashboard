@@ -16,11 +16,24 @@ const InvoiceCard = ({
   invoiceIds,
   setInvoiceIds,
 }: InvoiceCardProps) => {
+  const sumFloats = (num1: number, num2: number) => {
+    const numero1 = parseFloat(
+      num1.toString().replace(".", "").replace(",", "."),
+    );
+    const numero2 = parseFloat(
+      num2.toString().replace(".", "").replace(",", "."),
+    );
+    return numero1 + numero2;
+  };
+
   const mediumEnergyValue = () => {
     let medium = 0;
     if (invoice?.sceeEnergy && invoice?.electricEnergy) {
       medium =
-        invoice?.sceeEnergy.quantity + invoice?.electricEnergy.quantity / 2;
+        sumFloats(
+          invoice?.sceeEnergy.quantity,
+          invoice?.electricEnergy.quantity,
+        ) / 2;
     } else if (invoice?.sceeEnergy) {
       medium = invoice?.sceeEnergy.quantity;
     } else if (invoice?.electricEnergy) {
