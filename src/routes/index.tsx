@@ -1,12 +1,15 @@
 import type { ReactElement } from "react";
-import { Suspense, lazy } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Suspense, lazy, useEffect } from "react";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { CgSpinnerTwo } from "react-icons/cg";
 
 import { Dashboard } from "@/layout";
 import { Private } from "./private";
 import { Public } from "./public";
 import SignIn from "@/pages/auth/sign-in";
+import { authStore } from "@/store/auth.store";
+import { api } from "@/lib/api";
+import { isAxiosError } from "axios";
 
 const HomeRouter = lazy(() =>
   import("@/pages/dashboard/home/router").then((module) => ({
@@ -21,6 +24,38 @@ const InvoicesRouter = lazy(() =>
 );
 
 export function Router(): ReactElement {
+  const navigate = useNavigate();
+  const { logged } = authStore.getState().load();
+
+  useEffect(() => {
+    if (!logged) {
+      navigate("/sign-in", { replace: true });
+    }
+  }, [logged, navigate]);
+
+  useEffect(() => {
+    const interceptorId = api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (isAxiosError(error)) {
+          const status = error.response?.status;
+          const message = error.response?.data?.message;
+
+          if (status === 401 && message === "Unauthorized.") {
+            sessionStorage.clear();
+            navigate("/sign-in", { replace: true });
+          }
+        }
+
+        return Promise.reject(error);
+      },
+    );
+
+    return () => {
+      api.interceptors.response.eject(interceptorId);
+    };
+  }, [navigate]);
+
   return (
     <Suspense
       fallback={
@@ -30,17 +65,21 @@ export function Router(): ReactElement {
       }
     >
       <Routes>
-        <Route element={<Public />}>
-          <Route index element={<Navigate to="/sign-in" />} />
-          <Route path="sign-in" element={<SignIn />} />
-        </Route>
-
-        <Route element={<Private />}>
-          <Route element={<Dashboard />}>
-            <Route path="home/*" element={<HomeRouter />} />
-            <Route path="invoices/*" element={<InvoicesRouter />} />
+        {!logged && (
+          <Route element={<Public />}>
+            <Route index element={<Navigate to="/sign-in" />} />
+            <Route path="sign-in" element={<SignIn />} />
           </Route>
-        </Route>
+        )}
+
+        {logged && (
+          <Route element={<Private />}>
+            <Route element={<Dashboard />}>
+              <Route path="home/*" element={<HomeRouter />} />
+              <Route path="invoices/*" element={<InvoicesRouter />} />
+            </Route>
+          </Route>
+        )}
       </Routes>
     </Suspense>
   );

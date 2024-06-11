@@ -38,7 +38,6 @@ function ListInvoices() {
       .catch((error) => {
         console.log(error);
         setIsLoading(false);
-        alert("Ocorreu um erro ao buscar as faturas");
       });
   };
 

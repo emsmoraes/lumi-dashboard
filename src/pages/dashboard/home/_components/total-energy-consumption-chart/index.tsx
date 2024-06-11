@@ -95,7 +95,6 @@ const TotalEnergyConsumptionChart = () => {
       })
       .catch((error) => {
         console.log(error);
-        alert("Ocorreu um erro ao buscar os dados");
         setIsSearching(false);
       });
   }, [year, searchValue]);

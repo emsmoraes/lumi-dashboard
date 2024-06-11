@@ -91,9 +91,9 @@ const TotalEnergyValueChart = () => {
         setConsumptionValueData(mapData(response.data));
         setIsSearching(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log(err);
         setIsSearching(false);
-        alert("Erro ao buscar dados");
       });
   }, [year, searchValue]);
 
