@@ -14,8 +14,12 @@ import {
 import { cn } from "@/lib/utils";
 import { CgSpinnerTwo } from "react-icons/cg";
 import { Button } from "@/components/ui/button";
-import { MdDownload } from "react-icons/md";
+import { MdDownload, MdUpload } from "react-icons/md";
 import { useInvoicePdf } from "@/hooks/useInvoicesPdf";
+import { GoCheckCircle } from "react-icons/go";
+import { SlClose } from "react-icons/sl";
+import { ImSpinner5 } from "react-icons/im";
+import { useToast } from "@/components/ui/use-toast";
 
 function ListInvoices() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -23,8 +27,12 @@ function ListInvoices() {
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [invoiceIds, setInvoiceIds] = useState<number[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const hasMorePage = page < totalPages;
   const hasPreviousPage = page > 1;
+
+  const { toast } = useToast();
 
   const getInvoicesAsync = async () => {
     setIsLoading(true);
@@ -34,6 +42,9 @@ function ListInvoices() {
         setInvoices(res.data.invoices);
         setTotalPages(res.data.totalPages);
         setIsLoading(false);
+        toast({
+          title: "Fatura carregada com sucesso!",
+        });
       })
       .catch((error) => {
         console.log(error);
@@ -56,14 +67,42 @@ function ListInvoices() {
     });
   };
 
+  const downloadPdf = useInvoicePdf(
+    invoices.filter((invoice) => invoiceIds.includes(invoice.id)),
+  );
+
+  const handleUpload = async () => {
+    if (!file) {
+      return;
+    }
+    setIsUploading(true);
+    await api
+      .post(
+        "/invoice",
+        {
+          file: file,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      )
+      .then(() => {
+        getInvoicesAsync();
+        setFile(null);
+        setIsUploading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setIsUploading(false);
+      });
+  };
+
   useEffect(() => {
     setInvoiceIds([]);
     getInvoicesAsync();
   }, [page]);
-
-  const downloadPdf = useInvoicePdf(
-    invoices.filter((invoice) => invoiceIds.includes(invoice.id)),
-  );
 
   return (
     <ContentCard>
@@ -71,6 +110,42 @@ function ListInvoices() {
         <CardTitle className="font-inter text-2xl font-semibold text-zinc-900">
           Todas as faturas
         </CardTitle>
+        <div className="flex items-center gap-3 pt-4">
+          <label className="flex w-fit cursor-pointer items-center truncate rounded-md border-2 border-solid border-primary bg-transparent px-4 py-2 text-[14px] font-semibold text-primary hover:bg-transparent">
+            <input
+              accept="application/pdf"
+              className="hidden"
+              disabled={isUploading}
+              type="file"
+              onChange={(e) => {
+                // @ts-expect-error: Object is possibly 'null'
+                setFile(e.target.files[0]);
+              }}
+            />
+            <MdUpload fontSize={20} className="mr-2" />{" "}
+            {file ? `${file.name}` : "Adicionar"}
+          </label>
+          {file && (
+            <div className="flex items-center gap-2">
+              {isUploading ? (
+                <ImSpinner5
+                  style={{ animation: "spin 0.5s linear infinite" }}
+                  size={23}
+                />
+              ) : (
+                <button onClick={handleUpload}>
+                  <GoCheckCircle className="" size={25} />
+                </button>
+              )}
+
+              {!isUploading && (
+                <button onClick={() => setFile(null)}>
+                  <SlClose className="" size={24} />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </CardHeader>
 
       <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden">
