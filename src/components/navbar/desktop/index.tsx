@@ -1,3 +1,4 @@
+import LoggedUser from "@/components/logged-user";
 import { Routes } from "../routes";
 import LinkButton from "./link-button";
 
@@ -9,6 +10,8 @@ export function Desktop() {
           <LinkButton key={route.pathname} route={route} />
         ))}
       </div>
+
+      <LoggedUser />
     </div>
   );
 }

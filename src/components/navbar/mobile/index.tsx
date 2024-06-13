@@ -1,6 +1,7 @@
 import { Dispatch } from "react";
 import { Routes } from "../routes";
 import LinkButton from "./link-button";
+import LoggedUser from "@/components/logged-user";
 
 interface MobileProps {
   setOpen: Dispatch<React.SetStateAction<boolean>>;
@@ -14,6 +15,8 @@ export function Mobile({ setOpen }: MobileProps) {
           <LinkButton setOpen={setOpen} key={route.pathname} route={route} />
         ))}
       </div>
+
+      <LoggedUser />
     </div>
   );
 }

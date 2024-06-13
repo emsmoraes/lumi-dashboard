@@ -10,6 +10,7 @@ export type AuthRequest = Pick<User, "email" | "password">;
 
 export interface AuthResponse {
   token: Token;
+  user: User;
 }
 
 export interface ValidationCode extends BaseInt {

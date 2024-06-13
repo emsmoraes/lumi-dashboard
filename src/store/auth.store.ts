@@ -3,11 +3,13 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import { api } from "@/lib/api";
+import { User } from "@/models/user.model";
 
 interface StoreAuth {
   token?: string;
-  authenticate: (token: string) => void;
-  load: () => { logged: boolean };
+  user?: User;
+  authenticate: (token: string, user: User) => void;
+  load: () => { logged: boolean; user: User | undefined };
   logout: () => void;
 }
 
@@ -16,32 +18,35 @@ export const authStore = create<StoreAuth>()(
     (set, get) => ({
       authentication: undefined,
 
-      authenticate: (token: string): void => {
+      authenticate: (token: string, user: User): void => {
         api.defaults.headers.common.Authorization = `Bearer ${token}`;
 
         set((state) => ({
           ...state,
           token,
+          user,
         }));
       },
 
-      load: (): { logged: boolean } => {
+      load: (): { logged: boolean; user: User | undefined } => {
         const token = get()?.token || undefined;
+        const user = get()?.user || undefined;
 
-        if (!token) {
+        if (!token || !user) {
           sessionStorage.clear();
-          return { logged: false };
+          return { logged: false, user: undefined };
         }
 
         api.defaults.headers.common.Authorization = `Bearer ${token}`;
 
-        return { logged: true };
+        return { logged: true, user };
       },
       logout: (): void => {
         delete api.defaults.headers.common.Authorization;
         set((state) => ({
           ...state,
           token: undefined,
+          user: undefined,
         }));
         sessionStorage.clear();
       },

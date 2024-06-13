@@ -11,15 +11,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { IoEyeOffSharp, IoEyeSharp } from "react-icons/io5";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { authStore } from "@/store/auth.store";
-import { useSigninMutation } from "@/mutations/signin.mutation";
-import { useToast } from "@/components/ui/use-toast";
 import { ImSpinner5 } from "react-icons/im";
+import { api } from "@/lib/api";
+import { toast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
+  name: z
+    .string({
+      required_error: "Campo obrigatório.",
+    })
+    .min(2, "Campo obrigatório."),
   email: z
     .string({
       required_error: "Campo obrigatório.",
@@ -35,66 +38,73 @@ const formSchema = z.object({
     .min(6, "O campo precisa ter mais de 5 caracters."),
 });
 
-function SignIn() {
+function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const navigate = useNavigate();
-
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
     },
   });
 
-  const { authenticate } = authStore();
-
-  const {
-    mutateAsync: signin,
-    isPending,
-    isError,
-  } = useSigninMutation({
-    onError() {
-      toast({
-        title: "Error ao efetuar login",
+  const createUser = async (data: z.infer<typeof formSchema>) => {
+    setIsPending(true);
+    api
+      .post("/users", data)
+      .then(() => {
+        toast({
+          title: "Conta criada com sucesso!",
+        });
+        navigate("/sign-in", { replace: true });
+      })
+      .catch(() => {
+        toast({
+          title: "Error ao criar conta. Tente mais tarde",
+        });
+        setIsPending(false);
       });
-
-      form.setError("email", {
-        message: " ",
-      });
-      form.setError("password", {
-        message: " ",
-      });
-    },
-    onSuccess({ token: { token }, user }) {
-      authenticate(token, user);
-      toast({
-        title: "Login efetuado com sucesso!",
-      });
-      navigate("/home");
-    },
-  });
+  };
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data);
-    signin(data);
+    createUser(data);
   };
 
   return (
     <div className="flex h-screen w-full items-center justify-center">
       <div className="w-full max-w-[500px] laptop:w-[60%]">
         <div className="mb-11 flex flex-col items-center ">
-          <h1 className="mb-4 text-3xl font-bold text-gray-900">Login</h1>
+          <h1 className="mb-4 text-3xl font-bold text-gray-900">Registro</h1>
           <p className="text-center font-[400] text-gray-400">
-            Acesse sua conta fornecendo suas <br /> credenciais de acesso.
+            Crie sua conta agora mesmo e aproveite todos os benefícios que temos
+            para oferecer!
           </p>
         </div>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)}>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="mb-4 w-full">
+                  <FormControl>
+                    <Input
+                      className={`rounded-[4px] border-gray-300 font-inter text-sm font-[400] text-gray-300 focus:border-gray-600 focus:text-gray-600 ${
+                        field.value.trim() && "border-gray-600 text-gray-600"
+                      }`}
+                      placeholder="Digite seu nome completo"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="email"
@@ -155,49 +165,22 @@ function SignIn() {
             </div>
 
             <div className="mb-14 flex w-full items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  className={`rounded-full`}
-                  id="keep-logged-in"
-                  checked={rememberMe}
-                  onCheckedChange={(checked) =>
-                    setRememberMe(checked.valueOf() as boolean)
-                  }
-                />
-
-                <label
-                  htmlFor="keep-logged-in"
-                  className="text-sm
-                 font-[600]
-                 leading-none
-                 text-gray-600
-                 peer-disabled:cursor-not-allowed
-                 peer-disabled:opacity-70"
-                >
-                  Relembre-me
-                </label>
-              </div>
-
               <Link
                 to="/sign-up"
                 className="font-semibold text-primary underline"
               >
-                Crie uma conta
+                Entrar
               </Link>
             </div>
 
-            <Button
-              className="w-full"
-              variant="default"
-              disabled={isPending && !isError}
-            >
-              {isPending && !isError ? (
+            <Button className="w-full" variant="default" disabled={isPending}>
+              {isPending ? (
                 <>
                   <ImSpinner5 className="mr-2 animate-spin" size={20} />
                   <span className="block">Carregando...</span>
                 </>
               ) : (
-                "Login"
+                "Criar"
               )}
             </Button>
           </form>
@@ -207,4 +190,4 @@ function SignIn() {
   );
 }
 
-export default SignIn;
+export default SignUp;

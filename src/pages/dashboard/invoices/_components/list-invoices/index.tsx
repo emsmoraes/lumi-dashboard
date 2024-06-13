@@ -42,9 +42,6 @@ function ListInvoices() {
         setInvoices(res.data.invoices);
         setTotalPages(res.data.totalPages);
         setIsLoading(false);
-        toast({
-          title: "Fatura carregada com sucesso!",
-        });
       })
       .catch((error) => {
         console.log(error);
@@ -91,10 +88,16 @@ function ListInvoices() {
       .then(() => {
         getInvoicesAsync();
         setFile(null);
+        toast({
+          title: "Fatura carregada com sucesso!",
+        });
         setIsUploading(false);
       })
       .catch((error) => {
         console.log(error);
+        toast({
+          title: "Erro ao carregar fatura!",
+        });
         setIsUploading(false);
       });
   };

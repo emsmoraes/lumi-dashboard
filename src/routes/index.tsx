@@ -1,6 +1,12 @@
 import type { ReactElement } from "react";
 import { Suspense, lazy, useEffect } from "react";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import { CgSpinnerTwo } from "react-icons/cg";
 
 import { Dashboard } from "@/layout";
@@ -10,6 +16,7 @@ import SignIn from "@/pages/auth/sign-in";
 import { authStore } from "@/store/auth.store";
 import { api } from "@/lib/api";
 import { isAxiosError } from "axios";
+import SignUp from "@/pages/auth/sign-up";
 
 const HomeRouter = lazy(() =>
   import("@/pages/dashboard/home/router").then((module) => ({
@@ -25,13 +32,14 @@ const InvoicesRouter = lazy(() =>
 
 export function Router(): ReactElement {
   const navigate = useNavigate();
+  const location = useLocation();
   const { logged } = authStore.getState().load();
 
   useEffect(() => {
-    if (!logged) {
+    if (!logged && location.pathname !== "/sign-up") {
       navigate("/sign-in", { replace: true });
     }
-  }, [logged, navigate]);
+  }, [logged, location.pathname, navigate]);
 
   useEffect(() => {
     const interceptorId = api.interceptors.response.use(
@@ -69,6 +77,7 @@ export function Router(): ReactElement {
           <Route element={<Public />}>
             <Route index element={<Navigate to="/sign-in" />} />
             <Route path="sign-in" element={<SignIn />} />
+            <Route path="sign-up" element={<SignUp />} />
           </Route>
         )}
 
