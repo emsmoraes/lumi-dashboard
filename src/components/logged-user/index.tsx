@@ -16,7 +16,7 @@ const LoggedUser = () => {
         <div className="flex cursor-pointer items-center gap-2 duration-200 hover:bg-gray-100 hover:opacity-80">
           <Avatar>
             <AvatarImage
-              src="https://i.pinimg.com/280x280_RS/3a/66/f8/3a66f807ecd9a390077624a2fcf002ea.jpg"
+              src="https://upload.wikimedia.org/wikipedia/it/thumb/8/81/Fredfl.jpg/260px-Fredfl.jpg"
               alt="avatar"
             />
             <AvatarFallback>

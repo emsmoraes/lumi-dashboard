@@ -20,6 +20,9 @@ import { GoCheckCircle } from "react-icons/go";
 import { SlClose } from "react-icons/sl";
 import { ImSpinner5 } from "react-icons/im";
 import { useToast } from "@/components/ui/use-toast";
+import { FaRegFilePdf } from "react-icons/fa";
+import * as Dialog from "@radix-ui/react-dialog";
+import DocumentPreview from "@/components/document-preview";
 
 function ListInvoices() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -114,20 +117,36 @@ function ListInvoices() {
           Todas as faturas
         </CardTitle>
         <div className="flex items-center gap-3 pt-4">
-          <label className="flex w-fit cursor-pointer items-center truncate rounded-md border-2 border-solid border-primary bg-transparent px-4 py-2 text-[14px] font-semibold text-primary hover:bg-transparent">
-            <input
-              accept="application/pdf"
-              className="hidden"
-              disabled={isUploading}
-              type="file"
-              onChange={(e) => {
-                // @ts-expect-error: Object is possibly 'null'
-                setFile(e.target.files[0]);
-              }}
-            />
-            <MdUpload fontSize={20} className="mr-2" />{" "}
-            {file ? `${file.name}` : "Adicionar"}
-          </label>
+          {!file && (
+            <label className="flex w-fit cursor-pointer items-center truncate rounded-md border-2 border-solid border-primary bg-transparent px-4 py-2 text-[14px] font-semibold text-primary hover:bg-transparent">
+              <input
+                accept="application/pdf"
+                className="hidden"
+                disabled={isUploading}
+                type="file"
+                onChange={(e) => {
+                  // @ts-expect-error: Object is possibly 'null'
+                  setFile(e.target.files[0]);
+                }}
+              />
+              <MdUpload fontSize={20} className="mr-2" />
+              Adicionar
+            </label>
+          )}
+
+          {file && (
+            <Dialog.Root>
+              <Dialog.Trigger asChild>
+                <Button className="flex w-fit cursor-pointer items-center truncate rounded-md border-2 border-solid border-primary bg-transparent px-4 py-2 text-[14px] font-semibold text-primary hover:bg-transparent">
+                  <FaRegFilePdf fontSize={20} className="mr-2" />
+                  {file.name}
+                </Button>
+              </Dialog.Trigger>
+
+              <DocumentPreview file={file} />
+            </Dialog.Root>
+          )}
+
           {file && (
             <div className="flex items-center gap-2">
               {isUploading ? (

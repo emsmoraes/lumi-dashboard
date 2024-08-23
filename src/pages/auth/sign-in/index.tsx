@@ -32,7 +32,7 @@ const formSchema = z.object({
     .string({
       required_error: "Digite a sua senha.",
     })
-    .min(6, "O campo precisa ter mais de 5 caracters."),
+    .min(8, "O campo precisa ter mais de 7 caracters."),
 });
 
 function SignIn() {
